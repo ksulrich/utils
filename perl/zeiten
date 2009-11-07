@@ -1,0 +1,136 @@
+#!/usr/bin/perl -w
+#
+# $Id: zeiten,v 1.2 2001/02/19 16:15:13 ku Exp $
+#
+# Liest ein File mit folgendem Format ein:
+#-------------------------------------------------------
+#   IN: 16/06/1999  9:29:00
+#          OUT: 16/06/1999 9:50:00
+#   IN: 16/06/1999  9:51:00
+#          OUT: 16/06/1999 24:00:00
+#-------------------------------------------------------
+# und formt es in folgende Ausgabe um:
+#-------------------------------------------------------
+#   16/06/1999 09:29 bis 09:50 => 0:21 (0.35)
+#              09:51 bis 24:00 => 14:09 => 14:30 (14.50)
+#   17/06/1999 00:00 bis 24:00 => 24:00 (24.00)
+#-------------------------------------------------------
+
+use Time::Local;
+use Time::localtime;
+
+require "getopts.pl";
+
+# short option
+$opt_s = undef;
+
+($progname = $0) =~ s#.*/##;
+
+&Getopts("s") || usage($progname);
+
+$file = "/home/klulrich/Wissen/zeiten";
+
+# Layout des Files:
+# [^IN|^\tOUT]: tag/monat/jahr   std:min:sec
+
+#
+# Defines
+#
+$in      = "IN:";
+$out     = "OUT:";
+$no_date = "          ";
+
+#
+# Inital values
+#
+$next_in    = 0;
+$next_out   = 1;
+$time_sum   = 0;
+$state      = $next_in;
+$date_print = "ILLEGAL";
+$last_time  = 0;
+
+open(DB, $file) or die "Can't open $file for reading: $!\n";
+while (<DB>) {
+    # ignore comments and empty lines
+    next if (/^\w*#|^\w*$/);
+    chomp();
+    ($direction, $date, $timestamp) = split;
+    ($day, $mon, $year) = split('/', $date);
+    ($hour, $min, $sec) = split(':', $timestamp);
+    $time = timelocal($sec, $min, $hour, $day, $mon-1, $year);
+
+    # check if timestamp is steadily growing         
+    die "Illegal timestamp in line $.\n" 
+         unless ($last_time <= $time);
+
+    if ($state == $next_in && $direction eq $in) {
+        # we are in the right state and we got the right entry
+        $state      = $next_out;
+        $act_date   = $date;
+        $date_print = $date;
+        $time_in    = $time;
+        $start_hour = $hour;
+        $start_min  = $min;
+        if (defined($last_date) && $last_date eq $date) {
+            # entry of same day -> no date is printed
+            $date_print = $no_date; 
+        } else {
+            if ($time_sum != 0 && $opt_s) {
+                # short output version
+                printf("%s %d:%2.2d\n", 
+                    $last_date, $time_sum/60/60, ($time_sum/60)%60);
+            }
+            $time_sum = 0;
+        }
+    } elsif ($state == $next_out &&
+             $act_date eq $date && 
+             $direction eq $out) {
+        # we are in the right state and we got the right entry
+        $state     = $next_in;
+        $last_date = $date;
+        $time_out  = $time;
+
+        # check if time is steadily growing
+        die "Illegal timestamp in line $.\n"
+            unless ($time_out > $time_in);
+
+        $time_diff = $time_out - $time_in;
+        $time_sum += $time_diff;
+        unless ($opt_s) {
+            if ($date_print eq $no_date) {
+              # we got a following entry of the same day
+              printf("%s %2.2d:%2.2d bis %2.2d:%2.2d => %d:%2.2d " .
+                     "=> %d:%2.2d (%2.2f)\n", 
+                     $date_print, 
+                     $start_hour, $start_min, 
+                     $hour, $min,
+                     $time_diff/60/60, ($time_diff/60)%60, 
+                     $time_sum/60/60, ($time_sum/60)%60,
+                     $time_sum/60/60);
+            } else {
+              # we got one or the first entry for this day
+              printf("%s %2.2d:%2.2d bis %2.2d:%2.2d => %d:%2.2d (%2.2f)\n", 
+                     $date_print, 
+                     $start_hour, $start_min, 
+                     $hour, $min, 
+                     $time_diff/60/60, ($time_diff/60)%60,
+                     $time_diff/60/60);
+            }
+        }
+    } else {
+        # Input line has wrong layout
+        die "Line $. with wrong input format\n";
+    }
+    # remember the last timestamp to check the growth of time
+    $last_time = $time;
+}
+
+sub usage {
+  my ($progname) = @_;
+
+  printf STDERR "Usage: %s [-s]\n", $progname;
+  exit 1;
+}
+
+

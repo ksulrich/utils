@@ -1,0 +1,146 @@
+#!/usr/bin/perl
+#
+# $Header: cgrep,v 1.3 97/06/04 14:23:23 ulrich Exp $
+#
+# Usage: cgrep [-s<SECTION>] <PATTERN>
+
+use Getopt::Std;
+
+$file = "/home/klaus/Wissen/KNOW";
+$line = "^-+[ \t]*\$";
+$lineout = "--------------------";
+$section = ">>>Section:";
+$search = 0;
+$pos = 0;
+$sec_name = "";
+
+#------------------------------------------------------------------------------
+# Define the begin/end standout codes for the terminal.  The hardcoded
+# values are for the vt100 and its kind.  For other terminals, look up
+# the so/se capabilities in /etc/termcap or the smso/rmso capabilities
+# in the terminfo database.  A more robust way would be to get the codes
+# at runtime with something like
+#
+$so = `tput smso`;
+$se = `tput rmso`;
+
+#
+# get options
+#
+getopts('s:');
+
+#
+# check if there are enough arguments
+#
+&usage if !@ARGV;
+&usage if ($opt_s && !&check_sec($opt_s));
+
+#
+# Get the pattern and protect the delimiter.
+#
+$pat = shift(@ARGV);
+$pat =~ s#/#\\/#g;
+
+open(DB, $file) || die "cannot open $file for reading";
+while (<DB>) {
+    #
+    # look for Section header
+    #
+    if (/$section/) {
+	chop;
+	$sec_name = $_;
+	if ($opt_s && $sec_name =~ /\b$opt_s\b/i) {
+	    $print_out = 1;	# Enter Section
+	} else {
+	    $print_out = 0;	# Leave Section
+	}
+	next;
+    }
+    #
+    # look for first "---...---" line
+    #
+    if (!$search && /$line/) {
+	$search = 1;
+	next;
+    }
+    #
+    # push lines after "---...---" line
+    #
+    if ($search) {
+	#
+	# line "---...---" found?
+	#
+	if (/$line/) {
+	    #
+	    # check entry if $pat is in
+	    #
+	    while ($pos-- > 0) {
+		if ($ary[$pos] =~ s/$pat/$so$pat$se/i) {
+		    if ($opt_s) {
+			if ($print_out) {
+			    printf("%s%s%s\n", $lineout, $sec_name, $lineout);
+			    print @ary;
+			}
+		    } else {
+			printf("%s%s%s\n", $lineout, $sec_name, $lineout);
+			print @ary;
+		    }
+		    last;
+		}
+	    } 
+	    #
+	    # clear @ary and $pos
+	    #
+	    while (@ary) {
+		shift(@ary);
+	    }
+	    $pos = 0;
+	    $search = 1;
+	    next;
+	}
+	#
+	# save $_ in @ary
+	#
+	push(@ary, $_);
+	$pos++;
+    }
+}
+close(DB);
+
+sub usage {
+    local($a,$b);
+    local($FD);
+
+    open(FD, $file) || die "cannot open $file for reading";
+    printf("usage: %s [-s<SECTION>] <PATTERN>\n\t<SECTION>: ", $0);
+    while (<FD>) {
+	if (/$section/) {
+	    chop;
+	    ($a, $b) = split(/ /);
+	    printf("%s ", split(/</, $b));
+	}
+    }
+    print "\n";
+    exit 1;
+}
+
+sub check_sec {
+    local($x) = @_;
+    local($a,$b,$c);
+
+    open(FD, $file) || die "cannot open $file for reading";
+    while (<FD>) {
+	if (/$section/) {
+	    chop;
+	    ($a, $b) = split(/ /, $_);
+	    ($a, $c) = split(/</, $b);
+	    if ($x =~ /$a/i) {
+		close(FD);
+		return 1;
+	    }
+	}
+    }
+    close(FD);
+    return 0;
+}
+
