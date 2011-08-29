@@ -1,0 +1,25 @@
+PMR 39483,999,631
+
+Adapted the script                                                       
+https://ecurep.mainz.de.ibm.com/aexfiles/pmr/3/9/39483%2C999%2C631/suppo 
+rt_files/delete_failed_events.py                                         
+and you can call it now in this way:                                     
+                                                                         
+a) wsadmin.bat -lang jython -f delete_failed_events.py                   
+                                                                         
+or                                                                       
+                                                                         
+b) wsadmin.bat -lang jython -f delete_failed_events.py 100               
+                                                                         
+                                                                         
+a) is trying to delete all failed events and is resetting the failed     
+events view in the admin console                                         
+b) is deleting only 100 events and is not resetting the failed events    
+view                                                                     
+                                                                         
+So, you can try to run a) several times and if you always get the error, 
+try to run b) several times and if no more events gets deleted, run a)   
+again.                                                                   
+After all failed events are dropped (no more instances listed in the     
+failed events view), you need to restart the Monitor model.              
+                                                                         

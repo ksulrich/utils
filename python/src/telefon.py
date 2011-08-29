@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# $Id: telefon.py,v 1.3 2009/02/12 17:23:00 guest Exp $
+# $Id$
 #
 # Usage: ./telefon.py < $HOME/Wissen/telefon.txt <pattern>
 
@@ -35,7 +35,7 @@ def main():
                 # first entry
                 text = ""
             else:
-                # enty ended -> search for pattern
+                # entry ended -> search for pattern
                 #print "TEXT:", text
                 found = True
                 for p in pats:

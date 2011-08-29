@@ -1,0 +1,22 @@
+Hi Klaus,
+
+You can provide this sample script to the customer, to delete all of the failed events for a specific model/version:
+
+[deleteAllEvents.py]
+
+Note that the script includes variables myModel and myVersion.  These need to be set to the name and version of the model (so in the customer's case, this would need to be executed against 5 different combinations of model and version).  The script should be executed from the bin directory underneath the deployment manager profile directory, using the following command:
+
+./wsadmin.sh -wsadmin_classpath "../../../plugins/com.ibm.wbimonitor.errorq_6.2.0.jar" -lang jython -username <WAS_user> -password <WAS_password> -connType SOAP -port <SOAP_port> -f deleteAllEvents.py
+
+where 
+
+<WAS_user> = WAS administrative user name
+<WAS_password> = WAS administrative password
+<SOAP_port> = deployment manager SOAP port number
+
+Thanks,
+Ken Quarles
+BPM Tools L3 Lead / WebSphere Business Monitor L3
+LK5A/502, 4205 S. Miami Blvd., Durham, NC 27703
+(919) 543-9224 (T/L 441)
+quarles@us.ibm.com or Ken E Quarles/Raleigh/IBM@IBMUS
