@@ -1,0 +1,20 @@
+#!/usr/bin/perl -w
+
+my $user = "klulrich";
+my $path = "";
+my $cmd = "";
+
+# Name of running program
+my $pmr = shift @ARGV;
+
+$path = $pmr;
+
+if ($pmr =~ /^[\d]+[\d,A-Z]+$/) {
+  @pmr = split(/ */, $pmr);
+  $first = $pmr[0];
+  $second = $pmr[1];
+  $path = "/ecurep/pmr/$first/$second/$path"
+}
+
+$cmd = "ssh -XY $user\@ecurep.mainz.de.ibm.com -t \"cd $path ; xterm -fn 8x13 bash\" &";
+system($cmd) == 0 or die "Cant start shell on ecurep\n";
