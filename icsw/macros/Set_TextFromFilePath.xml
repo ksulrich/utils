@@ -1,0 +1,59 @@
+<contribution
+    alias=""
+    category=""
+    context="retainObject_write"
+    description="Workflow Actions"
+    editable="true"
+    group="pmr.edit"
+    id="1354880260398"
+    image="icon$Pointing Hand"
+    menubarPath="com.ibm.rcp.ui.actionsmenu/com.ibm.btt.swe.action.disppmr.menu.icsw/additions"
+    name="Set TextFromFile path"
+    priority="39"
+    sequence=""
+    showText="true"
+    toolTipText="Set TextFromFilePath"
+    visible="false">
+  <enableBy/>
+  <execute>
+  
+   #{javascript:
+
+function getPref(key)
+  {
+         var bundle = 'com.ibm.btt.util.core';
+         var PreferenceStoreLogic = @newInstance('com.ibm.btt.common.core.logic.PreferenceStoreLogic');
+         var instance = @newInstance('org.eclipse.core.runtime.preferences.InstanceScope');
+         var baseScope = @newInstance('org.eclipse.ui.preferences.ScopedPreferenceStore', instance, bundle);
+         var store = PreferenceStoreLogic.getPreferenceStore(bundle, baseScope);
+         var val = store.getString(key);
+         return val;
+  }
+
+ function setPref(key, value)
+  {
+         var bundle = 'com.ibm.btt.util.core';
+         var PreferenceStoreLogic = @newInstance('com.ibm.btt.common.core.logic.PreferenceStoreLogic');
+         var instance = @newInstance('org.eclipse.core.runtime.preferences.InstanceScope');
+         var baseScope = @newInstance('org.eclipse.ui.preferences.ScopedPreferenceStore', instance, bundle);
+         var store = PreferenceStoreLogic.getPreferenceStore(bundle, baseScope);
+
+         store.putValue(key, value);
+         val = store.getString(key);
+ 
+  }
+
+var path_file = getPref('getTextFromFile');
+if(path_file == '') path_file = 'c:/mypath/to/{{obj_PMRNumber}}/PMR.txt';
+var input = @inputbox('Please enter the file path you want to import text from. \r\n(Variables can be used, enclosed in double braces, e.g. {{obj_PMRNumber}})\r\n\r\nExamples: (use fault slashes for Windows, too)\r\nc:/share/{{obj_PMRNumber}}/pmr.txt\r\nor\r\n/usr/tmp/info.txt', 'Set TextFromFile - Enter path', path_file);
+
+if (input != "")
+{
+	 setPref('getTextFromFile', input);	
+}
+
+}
+
+
+</execute>
+</contribution>

@@ -1,0 +1,78 @@
+<contribution
+    alias=""
+    category=""
+    context="retainObject_write"
+    description="Workflow Actions"
+    editable="true"
+    group="pmr.edit"
+    id="1354880792183"
+    image="icon$Text"
+    menubarPath=""
+    name="File-&gt;Text"
+    priority="39"
+    sequence=""
+    showText="true"
+    toolTipText="Add Raw Text from File"
+    visible="true">
+  <enableBy>exists('obj') &amp;&amp; (not(isDispatched()) || isDispatched(obj)) &amp;&amp; (obj.Open) &amp;&amp; (obj.OnQueue)</enableBy>
+  <execute> 
+
+ #{javascript: 
+
+
+function getPref(key)
+  {
+         var bundle = 'com.ibm.btt.util.core';
+         var PreferenceStoreLogic = @newInstance('com.ibm.btt.common.core.logic.PreferenceStoreLogic');
+         var instance = @newInstance('org.eclipse.core.runtime.preferences.InstanceScope');
+         var baseScope = @newInstance('org.eclipse.ui.preferences.ScopedPreferenceStore', instance, bundle);
+         var store = PreferenceStoreLogic.getPreferenceStore(bundle, baseScope);
+         var val = store.getString(key);
+         return val;
+  }
+
+ 
+function getTextFromFile(pFile)
+  {
+             var eval_file = @expandText(pFile, '{{', '}}');
+			 var myFile = new java.io.File(eval_file);
+             if(myFile.isFile() == true)
+             {
+                      var reader = new java.io.FileReader(myFile);
+                      var baseCache = new java.io.BufferedReader(reader);
+                      var thisLine;
+                      var myText = "";
+
+                     while ( ( thisLine = baseCache.readLine() ) != null )
+                      {
+                          myText += thisLine;
+                          myText += "\r\n";
+
+                      }
+
+                      return myText;
+             }
+             else
+             {
+                @alert('The file ' + eval_file + ' does not exist.', 'File not found', 'error');
+                return "";
+
+             }
+    }
+
+
+if(getPref('getTextFromFile') != '')
+	@action('functional:com.ibm.btt.swe.action.retain.action.AddRawTextAction', 'text', getTextFromFile(getPref('getTextFromFile')));
+else
+	@alert('Please specify a file path to import text from.\r\nGoto Actions->ICS Workbench->Set TextFromFile path.', 'No file path specified', 'error');
+	
+
+
+
+
+
+}
+
+
+</execute>
+</contribution>
