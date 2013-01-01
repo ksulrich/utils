@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #
 # Put several files to ecurep
 # Usage: puttoecurep <PMR-Number> <list-of-files>
