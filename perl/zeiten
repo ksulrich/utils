@@ -28,7 +28,7 @@ $opt_s = undef;
 
 &Getopts("s") || usage($progname);
 
-$file = "/home/klulrich/Wissen/zeiten";
+$file = "/home/klaus/Wissen/zeiten";
 
 # Layout des Files:
 # [^IN|^\tOUT]: tag/monat/jahr   std:min:sec

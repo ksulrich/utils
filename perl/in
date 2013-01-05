@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# $Id: in,v 1.2 2001/02/22 13:48:44 ku Exp $
+#
+# Appends incoming time stamp to time data base
+
+PN=`basename $0`	# program name
+VER='0.1 (beta)'
+BIN=${HOME}/bin
+
+Usage () {
+	echo "$PN - Zeiterfassung (Kommen), $VER
+usage: $PN [hh:mm]" >&2
+	exit 1
+}
+
+Msg () {
+    for i
+    do echo "$PN: $i" >&2
+    done
+}
+
+Fatal () { Msg "$@"; exit 1; }
+
+comming () {
+	datum=`date "+IN: %d/%m/%Y%t%H:%M:%S"`
+	for i 
+	do
+		case "$i" in
+			[0-9]*:[0-9]*)	datum=`date "+IN: %d/%m/%Y%t$i:00"`;;
+	 		*)				continue;;
+		esac
+	done
+	echo "$datum" >> ${HOME}/Wissen/zeiten
+	echo "$datum"
+}
+
+while [ $# -gt 0 ]
+do
+    case "$1" in
+		--)	shift; break 2;;
+		-h)	Usage;;
+		-*)	Usage;;
+		*)	break 2;;		# first number
+    esac
+    shift
+done
+
+if [ $# -gt 0 ]
+then
+    comming "$@"
+else
+	comming
+fi
