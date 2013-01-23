@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+#
+# Generate jar listing under /opt/IBM/WebSphere/BPM/_allBPMjars.txt with script ~/bin/generateBPMjarlist.pl
+
+require "getopts.pl";
+
+my $file = "/opt/ibm/BPM/v8.0.1/_allBPMjars.txt";
+my $debug = undef;
+my $opt_d = undef;
+
+# Name of running program
+($progname = $0) =~ s#.*/##;
+
+&Getopts("d") || usage($progname);
+
+my $class = shift @ARGV;
+usage() unless (defined($class));
+
+my $zip = undef;
+$class =~ s|/|.|g;
+
+open(fd, $file) or die "Please generate $file with ~/bin/generateBPMjarlist.sh first"; 
+while (<fd>) {
+   if (m/^__ZIP__:(.*)$/) {
+       $zip = $1;
+       next;
+   }
+   if (m/$class/) {
+       print "$zip: $_"
+   }
+}
+
+sub usage {
+  my ($progname) = @_;
+
+  printf STDERR "Usage: %s [-d] <class_name>\n", $progname;
+  printf STDERR "       -d: Debug flag\n";
+  exit 1;
+}

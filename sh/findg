@@ -1,0 +1,3 @@
+#!/bin/sh
+
+find . -type f -exec grep -i -H "$1" {} \;
