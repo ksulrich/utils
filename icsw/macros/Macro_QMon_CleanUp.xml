@@ -1,0 +1,191 @@
+<contribution
+    alias=""
+    category=""
+    context="retainObject_write"
+    description="This macro dispatches to the first secondary that can be found in one of the specified monitoring queues, issues a CT, adds some Raw Text and requeues the secondary to the resolver's backlog queue"
+    editable="pmr.operate"
+    id="1355504480838"
+    image="columnicon$9"
+    menubarPath=""
+    name="Q-Mon Cleanup"
+    priority="39"
+    sequence=""
+    showText="true"
+    toolTipText="Move secondary to resolver's backlog queue"
+    visible="true">
+  <enableBy>
+	#{javascript: 
+	//enable if there is a resolver
+	if (obj_ResolverID != '') true; else false;
+	
+	}
+  </enableBy>
+  <execute>
+	<![CDATA[
+	#{javascript: 
+	
+	Array.prototype.contains = function(obj) {
+	    var i = this.length;
+	    while (i--) {
+	        if (this[i] == obj) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	
+	Array.max = function(array) {
+		return Math.max.apply(Math, array);
+	};
+
+	function getPref(key)
+	{
+         var bundle = 'com.ibm.btt.util.core';
+         var PreferenceStoreLogic = @newInstance('com.ibm.btt.common.core.logic.PreferenceStoreLogic');
+         var instance = @newInstance('org.eclipse.core.runtime.preferences.InstanceScope');
+         var baseScope = @newInstance('org.eclipse.ui.preferences.ScopedPreferenceStore', instance, bundle);
+         var store = PreferenceStoreLogic.getPreferenceStore(bundle, baseScope);
+         var val = store.getString(key);
+         return val;
+	}
+	
+	//get QMon queues (queues that are intended to be source queues when requeueing to backlog queue
+	var rec_q = getPref('recentQ');
+	
+	if(rec_q != null) //check, if there is a Q specified as Q-Mon queue
+	{
+		//check syntax
+		var regexp_q = /([A-Z0-9]{3,6},[0-9]{3})(?:#([A-Z0-9]{3,6},[0-9]{3})){0,1}(?:#([A-Z0-9]{3,6},[0-9]{3})){0,1}/; //allows to define at most 3 queues in the format XYZ,000
+		var match = regexp_q.test(rec_q);
+				
+		
+	   if(match == true) //only proceed, if one valid Q found
+	   {
+			
+		 var result_q = regexp_q.exec(rec_q);
+		 var arr_q = new Array();
+
+		 for(var q=1;q<=3;q++)
+		 {
+				
+	 	   if(result_q[q] != null)
+		   {
+				arr_q[q-1] = result_q[q];
+		   }
+		 }
+		
+				
+		//exclude Sev 1 PMRs
+		if (obj_Severity != 1)
+		{
+			
+			var num_sec = -1;
+			var exp_qname = /callid:\/\/([A-Z0-9]{3,6},[0-9]{3})/;  //RegExp for separating queue name
+			var exp_call = /callid:\/\/[A-Z0-9]{3,6},[0-9]{3}:(\d+)/; //RegExp for separating call number
+			var result;
+			
+			//check, if we can find an appropriate secondary to requeue
+			if (obj_SecondaryCall1 != '')
+			{
+				result = exp_qname.exec(obj_SecondaryCall1);
+				
+				//check, if secondary is in one of defined QMon queues
+				if(arr_q.contains(result[1]))
+				{
+					//@alert(result[1],'in Q!','info');
+					num_sec = obj_SecondaryCall1;			
+					q_name = result[1];
+				}
+
+			 if (obj_SecondaryCall2 != '')
+			  {
+				result = exp_qname.exec(obj_SecondaryCall2);
+				 
+				//check, if secondary is in one of defined QMon queues
+				if(arr_q.contains(result[1]))
+				{
+					//@alert(result[1],'in Q!','info');
+					num_sec = obj_SecondaryCall2;			
+					q_name = result[1];
+				}
+				 
+				if (obj_SecondaryCall3 != '')
+				{
+				    result = exp_qname.exec(obj_SecondaryCall3);
+				   
+					//check, if secondary is in one of defined QMon queues
+					if(arr_q.contains(result[1]))
+					{
+						//@alert(result[1],'in Q!','info');
+						num_sec = obj_SecondaryCall3;			
+						q_name = result[1];
+					}
+		
+				}
+			  }
+			}//end if(obj_SecondaryCall1 != '')
+			
+								
+						if (num_sec != -1)
+						{ //there is a secondary to be requeued
+							var res = @msgbox('Secondary PMR will be requeued from ' + q_name + ' to ' + obj_QueueCenter + '.\n\nProceed?', 'Do you want to proceed?', 'confirm');
+							if (res == true)
+							{
+										
+								//dispatch to selected secondary
+								@transaction('com.ibm.retain.sra.op.pmr.DispatchOperation', 'PMRURI', num_sec);
+								@println(@now() + " After dispatch to " + num_sec);
+																																									
+								
+								//Show Dialog box to create delay - ensure that dispatch action has been completed entirely
+								@alert('You are being dispatched now.\r\nWait a few seconds to click OK in order to allow the ICSW to finish dispatching completely.','Info','info');
+								@println(@now() + " After ok");
+								
+								//add text to PMR
+								@pmrAddText(obj_PMRNumber, 'ACTION TAKEN: Queue Monitor', '- noticed update', '- moved secondary to PMR owner\'s work queue\n', 'ACTION PLAN:', '- 	PMR owner to follow up, please');
+								@println(@now() + " After add text");
+								
+								//issue contact made
+								@action('contactMade');
+								//@transaction('com.ibm.retain.sra.op.pmr.ContactCustomerOperation', 'enabled', true, 'PMRURI', num_sec, 'contact_required', @len('1'));
+								@println(@now() + " After CT");
+								
+								//requeue secondary to owner's backlog queue
+								@action('UndispatchRequeue', 'newQ', obj_QueueCenter);
+								@println(@now() + " After requeue");
+								
+								//Refresh UI
+								//@transaction('com.ibm.retain.sra.op.pmr.RefreshPmrOperation', 'enabled', true, 'depth', @len('cc'), 'forceRefreshUI', true, 'PMRURI', 'pmrid://' + obj_pmr_id); 
+								//@println(@now() + " After refresh");
+												
+							}
+						}
+						else
+						{
+							@alert('All secondaries in Monitor queue are already placed in queue of primary PMR (' + obj_QueueCenter + ')', 'Nothing to do', 'info');
+						}
+						
+							
+		}//end if (obj_severity != 1)
+		else
+		{
+		   @alert("This action isn't supposed to be executed for Sev 1 PMRs.", 'Forbidden', 'error');
+		}
+		
+	   }//end if(match == true)
+	   else
+	   {
+		   @alert("You have a syntax error for your queues specified as QMon queues.\n\r(Use the Action 'Set Q-Mon queue(s)' from the Menu 'Actions->ICS Workbench' to correct it.)", 'Syntax error', 'error');
+	   }
+		
+	}//end if(rec_q != null)
+	else
+	{
+		@alert('You have to specify at least one queue as Q-Monitor queue you are working on. (Use the Action Set Q-Mon queue(s) from the Menu Actionas->ICS Workbench', 'Missing parameters', 'error');
+	
+	}
+	
+}
+]]>
+  </execute>
+</contribution>
