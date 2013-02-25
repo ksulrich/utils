@@ -22,7 +22,9 @@ print "Process only ", maxEvents, "for every instance"
 # in the format YYYY-MM-DDTHH:MM:SS as it is shown in the admin console
 
 myModel = 'ClipsAndTacks'
+myModel = 'HelloWorldMM'
 myVersion = '20070911120730'
+myVersion = '20080121000000'
 
 eqmb = AdminControl.queryNames('WebSphere:type=ErrorQ,*')
 modelVer = AdminControl.invoke(eqmb, 'getModelVersion', '[' + myModel + ' ' + myVersion + ']')

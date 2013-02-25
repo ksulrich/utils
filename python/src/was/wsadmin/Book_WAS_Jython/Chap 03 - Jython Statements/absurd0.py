@@ -1,0 +1,10 @@
+if 0 :
+	print 'tab'
+ 	print 'space tab'
+  	print 'space space tab'
+   	print 'space space space tab'
+    	print 'space space space space tab'
+     	print 'space space space space space tab'
+      	print 'space space space space space space tab'
+       	print 'space space space space space space space tab'
+print 'no tab'

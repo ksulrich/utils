@@ -1,0 +1,3 @@
+#!/bin/sh
+
+find . -type f -exec grep -i -n "$1" /dev/null {} \;
