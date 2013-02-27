@@ -16,17 +16,17 @@ $opt_d = undef;
 &Getopts("sd") || usage($progname);
 
 $file = shift @ARGV;
-$file = `cygpath -aw $file`;
-$file =~ s/\\/\\\\/g;
+#$file = `cygpath -aw $file`;
+#$file =~ s/\\/\\\\/g;
 
-#unless ($file =~ m|^/|) {
-#    # we have an relative path name
-#    $file = Cwd::cwd . "/" . $file;
-#    #
-#    # for windows and cygwin, we need to substitue the cygdrive path
-#    #
-#    $file =~ s|/cygdrive/([abcdefg])/|$1:/|g;
-#}
+unless ($file =~ m|^/|) {
+    # we have an relative path name
+    $file = Cwd::cwd . "/" . $file;
+    #
+    # for windows and cygwin, we need to substitue the cygdrive path
+    #
+    $file =~ s|/cygdrive/([abcdefg])/|$1:/|g;
+}
 print "DEBUG: file=$file\n" if ($opt_d);
 
 sub usage {
@@ -38,7 +38,7 @@ sub usage {
   exit 1;
 }
 
-system("rm -rf $destDir") == 0 or die "Cant remove $destDir: $!\n";
+#system("rm -rf $destDir") == 0 or die "Cant remove $destDir: $!\n";
 mkdir $destDir;
 
 chdir($destDir);
@@ -59,3 +59,4 @@ foreach (@jars) {
     chdir "..";
 }
 print "Files sucessfully created in $destDir\n" unless ($opt_s);
+

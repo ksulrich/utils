@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+$debug = 0;
 $dir = ".";
 $dir = shift;
 
@@ -10,15 +11,21 @@ chomp($home);
 while ($file = <FIND>) {
     chdir $home;
     chomp($file);
-#    print "FILE: '$file'\n";
+    print "FILE: '$file'\n" if ($debug);
+    if ($file =~ m|.*\$.*.class$|) {
+	print "File is inner class, ignore\n" if ($debug);
+	next;
+    }
     $file =~ m|^(.*)/(.*)\.class$|;
     $dir = $1;
     $name = $2;
-#    print "DIR: $dir, NAME: $name\n";
+    print "DIR: $dir, NAME: $name\n" if ($debug);
     chdir $dir or warn "Can not chdir to $dir. I am in \"", `pwd`, "\": $!";
-#    print "IN: ", `pwd`;
-    next if -e "$name.java";
-#    print "Call jad -o -sjava $name.class\n";
+    print "IN: ", `pwd` if ($debug);
+
+    # skip if java file exists
+    next if -e "$name.java"; 
+    print "jad", "-lnc", "-o", "-sjava", "$name.class", "\n" if ($debug);
     system("jad", "-lnc", "-o", "-sjava", "$name.class");
-#    print "BACK: ", `pwd`;
+    print "BACK: ", `pwd` if ($debug);
 }

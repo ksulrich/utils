@@ -25,7 +25,7 @@ while (<fd>) {
        $zip = $1;
        next;
    }
-   if (m/$class/) {
+   if (m/$class.class/) {
        print "$zip: $_"
    }
 }
