@@ -27,7 +27,7 @@ GetVersion () {
         then
         echo -n "$i was generated with " 
         getVersion.pl /tmp/xxx/META-INF/monResources.xml
-        echo ""
+#        echo ""
     fi
     done
 }

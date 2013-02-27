@@ -1,7 +1,7 @@
-#!/usr/bin/perl
+#!/usr/bin/perl 
 
 while (<>) {
-    if (m/generatorVersion="(.*?)"/) {
-        print $1;
+    if (m/generatorVersion="([\d\.]+)"/) {
+	print "$1\n";
     }
 }
