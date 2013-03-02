@@ -58,16 +58,6 @@ if (fileExists("$class.class")) {
     callEmacs($class);
 }
 
-sub usePlugin {
-    my ($plugin) = @_;
-    print "Use '$plugin' ? (y/n) ... ";
-    $answer = <>;
-    if ($answer =~ m/^[yY].*/) {
-	return 1;
-    }
-    return 0;
-}
-
 sub explode {
     my ($plugin) = @_;
     $plugin =~ s/ /\\ /g;
