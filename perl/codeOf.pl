@@ -2,7 +2,7 @@
 
 require "getopts.pl";
 
-$debug = 0;
+$debug = 1;
 
 $tmp = "/tmp/xxx";
 
@@ -14,26 +14,30 @@ $tmp = "/tmp/xxx";
 my $class = shift @ARGV;
 usage() unless (defined($class));
 
-
 print "DEBUG: grepbpm $class\n" if ($debug);
-open(GREP, "grepbpm $class |") or die "Cant call grepbpm $class: $!\n";
-while ($line = <GREP>) {
-    chomp($line);
-    print ("DEBUG: LINE$line\n") if ($debug);
-    if ($line =~ m/^\s*(.*): (.*)$/) {
-	$plugin = $1;
-	$class = $2;
-	print "DEBUG: PLUGIN=$plugin, CLASS=$class\n" if ($debug);
-	if (usePlugin($plugin)) {
-	    unless (fileExists($class)) {
-		explode($plugin);
-		generateJavaCode();
+$class = norm_class($class);
+if (fileExists("$class.class")) {
+    callEmacs("$class.java");
+} else {
+    print "DEBUG: grepbpm $class\n";
+    open(GREP, "grepbpm $class |") or die "Cant call grepbpm $class: $!\n";
+    while ($line = <GREP>) {
+	chomp($line);
+	print ("DEBUG: LINE$line\n") if ($debug);
+	if ($line =~ m/^\s*(.*): (.*)$/) {
+	    $plugin = $1;
+	    $class = $2;
+	    print "DEBUG: PLUGIN=$plugin, CLASS=$class\n" if ($debug);
+	    if (usePlugin($plugin)) {
+		unless (fileExists($class)) {
+		    explode($plugin);
+		    generateJavaCode();
+		}
+		callEmacs($class);
 	    }
-	    callEmacs($class);
 	}
     }
 }
-
 sub usePlugin {
     my ($plugin) = @_;
     print "Use '$plugin' ? (y/n) ... ";
@@ -46,35 +50,42 @@ sub usePlugin {
 
 sub explode {
     my ($plugin) = @_;
-    print "DEBUG: explode.pl $plugin\n" if ($debug);
+    print "DEBUG(explode): explode.pl $plugin\n" if ($debug);
     system("explode.pl", $plugin)
 }
 
 sub generateJavaCode {
-    print "DEBUG: generateJavaCode.pl $tmp\n" if ($debug);
+    print "DEBUG(generateJavaCode): generateJavaCode.pl $tmp\n" if ($debug);
     system("generateJavaCode.pl", $tmp);
 }
 
 sub callEmacs {
     my ($file) = @_;
-    print "DEBUG: FILE=$file\n" if ($debug);
+    print "DEBUG(callEmacs): FILE=$file\n" if ($debug);
     $file =~ s/^(.*).class/\1.java/g;
-    print "DEBUG: emacs $tmp/$file\n" if ($debug);
+    print "DEBUG(callEmacs): emacs $tmp/$file\n" if ($debug);
     system("emacs $tmp/$file &");
+}
+
+sub norm_class {
+    my ($file) = @_;
+    print "DEBUG(norm_class): FILE=$file\n" if ($debug);
+    $file =~ s/^(.*).class/\1/g;
+    $file =~ s|\.|/|g;
+    print "DEBUG(norm_class): Return $file\n" if ($debug);
+    return $file;
 }
 
 sub fileExists {
     my ($file) = @_;
-    print "DEBUG: FILE=$file\n" if ($debug);
-    $file =~ s/^(.*).class/\1.java/g;
-    print "DEBUG: Exists ? $tmp/$file\n" if ($debug);
+    print "DEBUG(fileExists): Exists ? $tmp/$file\n" if ($debug);
     return -e "$tmp/$file";
 }
 
 sub usage {
-  my ($progname) = @_;
+    my ($progname) = @_;
 
-  printf STDERR "Usage: %s [-d] <class_name>\n", $progname;
-  printf STDERR "       -d: Debug flag\n";
-  exit 1;
+    printf STDERR "Usage: %s [-d] <class_name>\n", $progname;
+    printf STDERR "       -d: Debug flag\n";
+    exit 1;
 }
