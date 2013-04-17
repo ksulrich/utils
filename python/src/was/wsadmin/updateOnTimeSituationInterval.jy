@@ -1,0 +1,32 @@
+#
+# $WAS_HOME/bin/wsadmin.sh -lang jython -wsadmin_classpath $WAS_HOME/plugins/com.ibm.wbimonitor.lifecycle.spi.jar -f updateOnTimeSituationInterval.jy
+
+from java.lang import Boolean
+from java.lang import Integer
+from java.lang import String
+from java.util import Properties
+from java.lang import System
+
+from com.ibm.wbimonitor.lifecycle.spi import LifecycleConstants
+from com.ibm.wbimonitor.lifecycle.spi import LifecycleVersionDate
+from com.ibm.wbimonitor.lifecycle.spi.mbeans import LifecycleServicesMBeanFactory
+
+# replace these with your model and version.  The version is just the version date without any punctuation.
+# do NOT forget the lowercase 'l' at the end of the version date
+modelID = 'BETV'
+versionDate = 20130213000000l
+
+#AdminControl.trace( 'com.ibm.wbimonitor.*=all=enabled' )
+
+ls_mbean = LifecycleServicesMBeanFactory.getMBean( AdminControl.getAdminClient() )
+print 'LifecycleServicesMBean.toString=' + ls_mbean.toString()
+
+props = ls_mbean.readVersionGeneralProperties(modelID, versionDate)
+print 'original props=' + props.toString()
+
+# set on-time situation interval
+props.setProperty("MON_OnTimeSituationInterval", "60")
+
+print 'setting  props=' + props.toString()
+
+ls_mbean.applyVersionGeneralProperties(modelID, versionDate, props)
