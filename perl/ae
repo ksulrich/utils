@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+# 
+#  Not used anymore
 
 my $pmr = shift @ARGV;
 my $path = $pmr;
