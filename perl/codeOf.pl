@@ -61,8 +61,8 @@ if (fileExists("$class.class")) {
 sub explode {
     my ($plugin) = @_;
     $plugin =~ s/ /\\ /g;
-    print "DEBUG(explode): cd /tmp/xxx; jar xf $plugin\n" if ($debug);
-    system("mkdir -p /tmp/xxx; cd /tmp/xxx; jar xf $plugin");
+    print "DEBUG(explode): cd /tmp/xxx/src; jar xf $plugin\n" if ($debug);
+    system("mkdir -p /tmp/xxx/src; cd /tmp/xxx/src; jar xf $plugin");
 }
 
 sub generateJavaCode {
@@ -74,8 +74,8 @@ sub callEmacs {
     my ($file) = @_;
     print "DEBUG(callEmacs): FILE=$file\n" if ($debug);
     $file =~ s/^(.*).class/\1.java/g;
-    print "DEBUG(callEmacs): emacs $tmp/$file\n" if ($debug);
-    system("emacs $tmp/$file &");
+    print "DEBUG(callEmacs): emacs $tmp/src/$file\n" if ($debug);
+    system("emacs $tmp/src/$file &");
 }
 
 sub norm_class {
