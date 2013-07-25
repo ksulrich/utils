@@ -16,7 +16,8 @@
   (point-min)
   (search-forward "ACTION TAKEN:")
   (search-forward "---------------------------- EMAIL TEXT START --------------------------")
-  (next-line))
+  (next-line)
+  (delete-other-windows))
 
 ;(pmr-read-template)
 ;;
