@@ -9,6 +9,10 @@
 ;; Position cuser in received email section
 ;;
 (defun pmr-read-template ()
+  "Reads the file ~/x.txt and inserts the PMR template.
+
+After inserting the PMR template, it positions the cursor
+just after \"ACTION TAKEN:\"."
   (interactive)
   (find-file "~/x.txt")
   (goto-char 0)
@@ -24,6 +28,10 @@
 ;; Do clean-up steps and save buffer
 ;;
 (defun pmr-clean-up ()
+  "Clean up file x.txt.
+
+Removes everything after template closing tag and removes
+all unwanted stuff before saving the file."
   (interactive)
   (save-excursion
     (find-file "~/x.txt")
@@ -32,6 +40,7 @@
     (delete-region (point) (point-max))
     (goto-char (point-min))
     (replace-regexp "\tPage [0-9]+ of [0-9]+" "")
+    (delete-trailing-whitespace)
     (save-buffer)))
 
 
