@@ -48,3 +48,5 @@ all unwanted stuff before saving the file."
 
 (define-key global-map [f12] 'pmr-read-template)
 (define-key global-map [f11] 'pmr-clean-up)
+
+(provide 'pmr-template)
