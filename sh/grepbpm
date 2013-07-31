@@ -4,7 +4,15 @@
 
 require "getopts.pl";
 
+# 
+# Target file needs to be adapted
+#
 my $file = "/opt/ibm/BPM/v8.0.1/_allBPMjars.txt";
+
+
+#
+# Leave this untouched
+#
 my $debug = undef;
 my $opt_d = undef;
 
