@@ -4,4 +4,4 @@
 # 
 # Creates a list of "<retain_id>" "<user>" 
 
-find /c/CCWin -name "owner.dat" -exec grep -v // {} \; | grep -v ^\# | sort | grep -v \"\" | grep -v "      "
+find /c/CCWin -name "owner.dat" -exec grep -v // {} \; | col -b | grep -v ^\# | sort | grep -v \"\" | grep -v "      " | grep -v -e '^[       ]*$'
