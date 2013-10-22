@@ -74,13 +74,13 @@ class Working:
     def print_summary_year(self):
         for y in sorted(self.years.keys()):
             this_year = self.years[y]
-            print "%d => %.2f" % (this_year.get_year(), this_year.sum())
+            print "%4d => %6.2f" % (this_year.get_year(), this_year.sum())
     def print_summary_months(self):
         for y in sorted(self.years.keys()):
             this_year = self.years[y]
             months = this_year.get_months()
             for m in sorted(months.keys()):
-                print "%d-%d => %.2f" % (this_year.get_year(), months[m].month, months[m].sum())
+                print "%4d-%02d => %6.2f" % (this_year.get_year(), months[m].month, months[m].sum())
         
 def main():
     w = Working()

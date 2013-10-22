@@ -32,7 +32,7 @@ for line in sys.stdin:
     if (day < nextMonday):
         week += int(hours)
     else:
-        print "From %s to %s -> %1.1f hours" % \
+        print "From %s to %s -> %4.1f hours" % \
               (lastMonday, (nextMonday + timedelta(days=-1)), float(week) / 10)
         week = int(hours)
         lastMonday = previousMonday(day)
