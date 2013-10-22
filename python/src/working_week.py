@@ -5,21 +5,34 @@
 
 import sys
 import datetime
+from datetime import timedelta
 
-found = False
+lastMonday = None
+nextMonday = None
 week = 0
 
+def previousMonday(day):
+    while (day.weekday() != 0):
+        day = day + timedelta(days=-1)
+    return day
+
+def comingMonday(day):
+    while (day.weekday() != 0):
+        day = day + timedelta(days=1)
+    return day
+
 for line in sys.stdin:
+    # a line has the form "2013-10-21 93"
     date, hours = line.split()
     year, month, day = date.split('-')
-    #print "xxx:", year, month, day, "->", hours
     day = datetime.date(int(year), int(month), int(day))
-    if (day.weekday() == 0):
-        if (found):
-            print "From %s to %s -> %1.1f hours" % (monday, lastday, float(week)/10)
-        found = True;
-        week = int(hours)
-        monday = day;
-    elif (found):
+    if (lastMonday == None):
+        lastMonday = previousMonday(day)
+        nextMonday = comingMonday(day)
+    if (day < nextMonday):
         week += int(hours)
-        lastday = day
+    else:
+        print "From %s to %s -> %1.1f hours" % (lastMonday, (nextMonday + timedelta(days=-1)), float(week) / 10)
+        week = int(hours)
+        lastMonday = previousMonday(day)
+        nextMonday = comingMonday(day + timedelta(days=1))
