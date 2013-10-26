@@ -1,36 +1,39 @@
 #!/usr/bin/env python
 # $Id: working_week.py,v 1.1 2008/12/10 18:12:50 guest Exp $
 #
-# Sums up all hours for one week and prints out result
-#
 # Call as working.py | working_week.py
 
 import sys
 import datetime
+from datetime import timedelta
 
-# found marks if Monday was found
-found = False
-
-# sum counter for one week
+lastMonday = None
+nextMonday = None
 week = 0
 
+def previousMonday(day):
+    while (day.weekday() != 0):
+        day = day + timedelta(days=-1)
+    return day
+
+def comingMonday(day):
+    while (day.weekday() != 0):
+        day = day + timedelta(days=1)
+    return day
+
 for line in sys.stdin:
+    # a line has the form "2013-10-21 93"
     date, hours = line.split()
     year, month, day = date.split('-')
-    #print "xxx:", year, month, day, "->", hours
     day = datetime.date(int(year), int(month), int(day))
-    if (day.weekday() == 0):
-        # we have a Monday
-        if (found):
-            # We have already data collected, print it out
-            print "From %s to %s -> %1.1f hours" % (monday, lastday, float(week)/10)
-        found = True;
-        # Reset sum counter and start again
-        week = int(hours)
-        # remember this monday for next print out
-        monday = day;
-    elif (found):
-        # No Monday, sum it up
+    if (lastMonday == None):
+        lastMonday = previousMonday(day)
+        nextMonday = comingMonday(day)
+    if (day < nextMonday):
         week += int(hours)
-        # remember this day in variable lastday
-        lastday = day
+    else:
+        print "From %s to %s -> %4.1f hours" % \
+              (lastMonday, (nextMonday + timedelta(days=-1)), float(week) / 10)
+        week = int(hours)
+        lastMonday = previousMonday(day)
+        nextMonday = comingMonday(day + timedelta(days=1))

@@ -13,7 +13,7 @@ def calc():
     keys = dict.keys()
     keys.sort()
     for k in keys:
-        print k, dict.get(k)
+        print "%s %3.1d" % (k, dict.get(k))
 #    for k, v in dict.iteritems():
 #        print k, v
 
