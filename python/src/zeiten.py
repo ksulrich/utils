@@ -2,7 +2,7 @@
 
 import os
 import re
-import datetime
+from datetime import datetime, timedelta
 
 FILE_EXT = 'Wissen' + os.sep + 'zeiten'
 DB = os.getenv('HOME', 'c:/tmp')
@@ -16,25 +16,49 @@ class Element:
     def __init__(self, type, dt):
         self.element = { 'type': type, 'dt': dt }
 
+    def __repr__(self):
+        return "Element(%d, %s)" % (self.element['type'], self.element['dt'])
+
     def key(self):
-        return self.element['dt'].date
+        return self.element['dt'].date()
+
+    def value(self):
+        return self.element['dt']
 
     def type(self):
         return self.element['type']
+
 
 class Data:
     def __init__(self):
         self.data = {}
 
     def add(self, e):
-        if self.data.has_key(e.key):
-            self.data[e.key].append(e)
+        key = e.key()
+        if self.data.has_key(key):
+            self.data[key].append(e)
         else:
-            self.data[e.key] = []
-            self.data[e.key].append(e)
+            self.data[key] = []
+            self.data[key].append(e)
 
     def getForDay(self, date):
-        return self.data[date]
+        sum = timedelta(0)
+        #print "Data::getForDay(", date, "): return ", self.data[date]
+        if self.data.has_key(date):
+            i_in = None
+            i_out = None
+            for i in self.data[date]:
+                if (i.type() == 0):
+                    i_in = i
+                elif (i.type() == 1):
+                    i_out = i
+                else:
+                    raise ValueError("Illegal type found: ", i.type())
+                if (i_in != None) and (i_out != None):
+                    sum += i_out.value() - i_in.value()
+                    i_in = None
+                    i_out = None
+        return sum
 
 def main():
     data = Data()
