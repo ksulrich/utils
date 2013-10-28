@@ -4,7 +4,7 @@ import os
 import re
 from datetime import datetime, timedelta
 
-FILE_EXT = 'Wissen' + os.sep + 'zeiten'
+FILE_EXT = 'Wissen' + os.sep + 'zeiten.txt'
 DB = os.getenv('HOME', 'c:/tmp')
 FILE = DB + os.sep + FILE_EXT
 
@@ -36,6 +36,8 @@ class Data:
     def add(self, e):
         key = e.key()
         if self.data.has_key(key):
+            elements = self.data[key]
+            assert elements[-1].type() != e.type(), 'illegal IN and OUT sequence'
             self.data[key].append(e)
         else:
             self.data[key] = []
@@ -73,23 +75,23 @@ def main():
         m_in = pin.match(i)
         if (m_in):
             print "IN found: ", m_in.group(1, 2, 3, 4, 5, 6)
-            d = datetime.datetime(int(m_in.group(3)),
-                                  int(m_in.group(2)),
-                                  int(m_in.group(1)),
-                                  int(m_in.group(4)),
-                                  int(m_in.group(5)),
-                                  int(m_in.group(6)))
+            d = datetime(int(m_in.group(3)),
+                         int(m_in.group(2)),
+                         int(m_in.group(1)),
+                         int(m_in.group(4)),
+                         int(m_in.group(5)),
+                         int(m_in.group(6)))
             print "d=%s, date=%s" % (d, d.date())
             data.add(Element(Element.IN, d))
         m_out = pout.match(i)
         if (m_out):
             print "OUT found: ", m_out.group(1, 2, 3, 4, 5, 6)
-            d = datetime.datetime(int(m_out.group(3)),
-                                  int(m_out.group(2)),
-                                  int(m_out.group(1)),
-                                  int(m_out.group(4)),
-                                  int(m_out.group(5)),
-                                  int(m_out.group(6)))
+            d = datetime(int(m_out.group(3)),
+                         int(m_out.group(2)),
+                         int(m_out.group(1)),
+                         int(m_out.group(4)),
+                         int(m_out.group(5)),
+                         int(m_out.group(6)))
             print "d=", d
             data.add(Element(Element.OUT, d))
 
