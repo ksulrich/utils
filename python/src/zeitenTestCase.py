@@ -25,5 +25,16 @@ class ZeitenTestCase(unittest.TestCase):
 
         self.assertEqual(zeitDaten.getForDay(dt1.date()), delta + delta, 'getForDay not working')
 
+        dt1 = datetime(year=2010, month=10, day=29, hour=10, minute=0, second=0)
+        zeitDaten.add(Element(Element.IN, dt1))
+        delta = timedelta(hours=3)
+        zeitDaten.add(Element(Element.OUT, dt1 + delta))
+
+        dt1 += timedelta(hours=3)
+        zeitDaten.add(Element(Element.IN, dt1))
+        zeitDaten.add(Element(Element.OUT, dt1 + delta))
+
+        self.assertEqual(zeitDaten.getForDay(dt1.date()), delta + delta, 'getForDay not working')
+
 if __name__ == '__main__':
     unittest.main()
