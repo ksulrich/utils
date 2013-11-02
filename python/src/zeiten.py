@@ -79,6 +79,14 @@ class Data:
                     i_out = None
         return sum
 
+def printout(lastMonday, nextMonday, sum):
+    days = sum.days
+    hours = sum.seconds / 60 / 60
+    minutes = (sum.seconds - hours * 60 * 60) / 60
+    seconds = (sum.seconds - hours * 60 * 60 - minutes * 60)
+    print "Week from %s to %s => %02d:%02d:%02d hours" % (lastMonday, nextMonday - timedelta(days=1),
+                                                                      days * 24 + hours, minutes, seconds)
+
 def main():
     data = Data()
     # 03/07/2006	9:30:00
@@ -113,23 +121,22 @@ def main():
                 #print "d=", d
                 data.add(Element(Element.OUT, d))
 
-    #print data
-    days = data.getDays()
-#    for d in days:
-#        print "%s -> %s" % (d, data.getForDay(d))
-
     sum = timedelta(0)
     lastMonday = None
     nextMonday = None
-    for d in days:
+    for d in data.getDays():
+        if nextMonday and d > nextMonday:
+            # we have a date after our nextMonday, print out the stuff
+            printout(lastMonday, nextMonday, sum)
+            lastMonday = nextMonday
+            nextMonday = lastMonday + timedelta(days=7)
+            sum = timedelta(0)
         if d.weekday() == 0:
             # Monday
             if lastMonday:
-                print "Week from %s to %s: %5.2d:%2d hours" % (lastMonday, nextMonday - timedelta(days=-1),
-                                                               sum.total_seconds()/60/60, sum.total_seconds() % 60*60)
+                printout(lastMonday, nextMonday, sum)
             lastMonday = d
-            nextMonday = d + timedelta(days=7)
-
+            nextMonday = lastMonday + timedelta(days=7)
             sum = timedelta(0)
         sum += data.getForDay(d)
 
