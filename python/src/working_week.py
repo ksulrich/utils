@@ -7,33 +7,47 @@ import sys
 import datetime
 from datetime import timedelta
 
-lastMonday = None
-nextMonday = None
-week = 0
-
 def previousMonday(day):
-    while (day.weekday() != 0):
-        day = day + timedelta(days=-1)
+    while day.weekday() != 0:
+        day -= timedelta(days=1)
     return day
 
-def comingMonday(day):
-    while (day.weekday() != 0):
-        day = day + timedelta(days=1)
-    return day
+def printout(lastMonday, nextMonday, week):
+    print "From %s to %s -> %4.1f hours" % \
+          (lastMonday, (nextMonday + timedelta(days=-1)), float(week) / 10)
 
-for line in sys.stdin:
-    # a line has the form "2013-10-21 93"
-    date, hours = line.split()
-    year, month, day = date.split('-')
-    day = datetime.date(int(year), int(month), int(day))
-    if (lastMonday == None):
-        lastMonday = previousMonday(day)
-        nextMonday = comingMonday(day)
-    if (day < nextMonday):
-        week += int(hours)
-    else:
-        print "From %s to %s -> %4.1f hours" % \
-              (lastMonday, (nextMonday + timedelta(days=-1)), float(week) / 10)
-        week = int(hours)
-        lastMonday = previousMonday(day)
-        nextMonday = comingMonday(day + timedelta(days=1))
+def main(f):
+    lastMonday = None
+    nextMonday = None
+    week = 0
+    for line in f:
+        # a line has the form "2013-10-21 93"
+        #print "Line: ", line,
+        date, hours = line.split()
+        year, month, day = date.split('-')
+        day = datetime.date(int(year), int(month), int(day))
+        #print "Day: %s, lM=%s, nM=%s, week=%d" % (day, lastMonday, nextMonday, week)
+        if lastMonday is None:
+            lastMonday = previousMonday(day)
+            nextMonday = lastMonday + timedelta(days=7)
+            week = 0
+        while day > nextMonday:
+            # we are over next monday already
+            printout(lastMonday, nextMonday, week)
+            lastMonday = nextMonday
+            nextMonday = lastMonday + timedelta(days=7)
+            week = 0
+        if day == nextMonday:
+            # we are at next monday
+            printout(lastMonday, nextMonday, week)
+            lastMonday = nextMonday
+            nextMonday = lastMonday + timedelta(days=7)
+            week = 0
+        if day >= lastMonday and day < nextMonday:
+            week += int(hours)
+
+if __name__ == '__main__':
+    f = sys.stdin
+    if len(sys.argv) > 1:
+        f = open(sys.argv[1])
+    main(f)
