@@ -5,7 +5,7 @@ import re
 from datetime import datetime, timedelta
 import pprint
 
-FILE_EXT = 'Wissen' + os.sep + 'zeiten.txt'
+FILE_EXT = 'Wissen' + os.sep + 'zeiten'
 DB = os.getenv('HOME', 'c:/tmp')
 FILE = DB + os.sep + FILE_EXT
 
