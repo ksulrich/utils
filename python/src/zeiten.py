@@ -5,10 +5,6 @@ import re
 from datetime import datetime, timedelta
 import pprint
 
-FILE_EXT = 'Wissen' + os.sep + 'zeiten'
-DB = os.getenv('HOME', 'c:/tmp')
-FILE = DB + os.sep + FILE_EXT
-
 class Element:
 
     IN = 0
@@ -79,15 +75,36 @@ class Data:
                     i_out = None
         return sum
 
+class timedeltaplus():
+    def __init__(self, td):
+        self.timedelta = td
+
+    def getDays(self):
+        return self.timedelta.days
+
+    def getHours(self):
+        return self.timedelta.seconds / 60 / 60
+
+    def getMinutes(self):
+        return (self.timedelta.seconds - self.getHours() * 60 * 60) / 60
+
+    def getSeconds(self):
+        return (self.timedelta.seconds - self.getHours() * 60 * 60 - self.getMinutes() * 60)
+
 def printout(lastMonday, nextMonday, sum):
-    days = sum.days
-    hours = sum.seconds / 60 / 60
-    minutes = (sum.seconds - hours * 60 * 60) / 60
-    seconds = (sum.seconds - hours * 60 * 60 - minutes * 60)
+    tdp = timedeltaplus(sum)
+    days = tdp.getDays()
+    hours = tdp.getHours()
+    minutes = tdp.getMinutes()
+    seconds = tdp.getSeconds()
     print "Week from %s to %s => %02d:%02d:%02d hours" % (lastMonday, nextMonday - timedelta(days=1),
                                                                       days * 24 + hours, minutes, seconds)
 
 def main():
+    FILE_EXT = 'Wissen' + os.sep + 'zeiten'
+    DB = os.getenv('HOME', 'c:/tmp')
+    FILE = DB + os.sep + FILE_EXT
+
     data = Data()
     # 03/07/2006	9:30:00
     pin = re.compile('^IN:\s+(\d+)/(\d+)/(\d+)\s+(\d+):(\d+):(\d+)')
