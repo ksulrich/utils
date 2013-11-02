@@ -4,7 +4,7 @@
 #
 # Run:
 # find . -name "*.wma" > files
-# convert_wma_to_mp3.pl < files
+# convert_wma_to_mp3.pl files
 
 use strict;
 
