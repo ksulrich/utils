@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import re
@@ -39,7 +39,7 @@ class Data:
         Add an Element to the database
         """
         key = e.key()
-        if self.data.has_key(key):
+        if key in self.data:
             elements = self.data[key]
             assert elements[-1].type() != e.type(), 'illegal IN and OUT sequence'
             self.data[key].append(e)
@@ -58,8 +58,8 @@ class Data:
         Returns the sum of a specific day
         """
         sum = timedelta(0)
-        #print "Data::getForDay(", date, "): return ", self.data[date]
-        if self.data.has_key(date):
+        #print("Data::getForDay(", date, "): return ", self.data[date])
+        if date in self.data:
             i_in = None
             i_out = None
             for i in self.data[date]:
@@ -70,6 +70,7 @@ class Data:
                 else:
                     raise ValueError("Illegal type found: ", i.type())
                 if (i_in != None) and (i_out != None):
+                    #print("i_out.value()=%s, i_in.value()=%s, diff=%s" % (i_out.value(), i_in.value(), i_out.value() - i_in.value()))
                     sum += i_out.value() - i_in.value()
                     i_in = None
                     i_out = None
@@ -83,22 +84,24 @@ class timedeltaplus():
         return self.timedelta.days
 
     def getHours(self):
-        return self.timedelta.seconds / 60 / 60
+        return self.timedelta.seconds // 60 // 60
 
     def getMinutes(self):
-        return (self.timedelta.seconds - self.getHours() * 60 * 60) / 60
+        return (self.timedelta.seconds - self.getHours() * 60 * 60) // 60
 
     def getSeconds(self):
         return (self.timedelta.seconds - self.getHours() * 60 * 60 - self.getMinutes() * 60)
 
 def printout(lastMonday, nextMonday, sum):
     tdp = timedeltaplus(sum)
+    #print("printout: sum=%s, tpd=%s" % (sum, tdp))
     days = tdp.getDays()
     hours = tdp.getHours()
     minutes = tdp.getMinutes()
     seconds = tdp.getSeconds()
-    print "Week from %s to %s => %02d:%02d:%02d hours" % (lastMonday, nextMonday - timedelta(days=1),
-                                                                      days * 24 + hours, minutes, seconds)
+    #print("XXX: days=%d, hours=%d, minutes=%d, seconds=%d" % (days, hours, minutes, seconds))
+    print("Week from %s to %s => %02d:%02d:%02d hours" % (lastMonday, nextMonday - timedelta(days=1),
+                                                                      days * 24 + hours, minutes, seconds))
 
 def main():
     FILE_EXT = 'Wissen' + os.sep + 'zeiten'
@@ -117,25 +120,25 @@ def main():
                 continue
             m_in = pin.match(line)
             if (m_in):
-                #print "IN found: ", m_in.group(1, 2, 3, 4, 5, 6)
+                #print("IN found: ", m_in.group(1, 2, 3, 4, 5, 6))
                 d = datetime(int(m_in.group(3)),
                              int(m_in.group(2)),
                              int(m_in.group(1)),
                              int(m_in.group(4)),
                              int(m_in.group(5)),
                              int(m_in.group(6)))
-                #print "d=%s, date=%s" % (d, d.date())
+                #print("d=%s" % d)
                 data.add(Element(Element.IN, d))
             m_out = pout.match(line)
             if (m_out):
-                #print "OUT found: ", m_out.group(1, 2, 3, 4, 5, 6)
+                #print("OUT found: ", m_out.group(1, 2, 3, 4, 5, 6))
                 d = datetime(int(m_out.group(3)),
                              int(m_out.group(2)),
                              int(m_out.group(1)),
                              int(m_out.group(4)),
                              int(m_out.group(5)),
                              int(m_out.group(6)))
-                #print "d=", d
+                #print("d=", d)
                 data.add(Element(Element.OUT, d))
 
     sum = timedelta(0)
