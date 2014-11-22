@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # $Id: working_analysis.py,v 1.1 2009/01/19 10:53:00 guest Exp $
 #
 # Call as working.py | working_analysis.py
@@ -28,7 +28,7 @@ class Month:
         return self.days
     def sum(self):
         sum = 0.0
-        for d in self.days.keys():
+        for d in list(self.days.keys()):
             sum += self.days[d].sum()
         return sum
 
@@ -48,7 +48,7 @@ class Year:
         return self.months[m]
     def sum(self):
         sum = 0.0
-        for m in self.months.keys():
+        for m in list(self.months.keys()):
             sum += self.months[m].sum()
         return sum
 
@@ -74,13 +74,13 @@ class Working:
     def print_summary_year(self):
         for y in sorted(self.years.keys()):
             this_year = self.years[y]
-            print "%4d => %6.2f" % (this_year.get_year(), this_year.sum())
+            print("%4d => %6.2f" % (this_year.get_year(), this_year.sum()))
     def print_summary_months(self):
         for y in sorted(self.years.keys()):
             this_year = self.years[y]
             months = this_year.get_months()
             for m in sorted(months.keys()):
-                print "%4d-%02d => %6.2f" % (this_year.get_year(), months[m].month, months[m].sum())
+                print("%4d-%02d => %6.2f" % (this_year.get_year(), months[m].month, months[m].sum()))
         
 def main():
     w = Working()

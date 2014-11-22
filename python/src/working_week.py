@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # $Id: working_week.py,v 1.1 2008/12/10 18:12:50 guest Exp $
 #
 # Call as working.py | working_week.py
@@ -13,8 +13,8 @@ def previousMonday(day):
     return day
 
 def printout(lastMonday, nextMonday, week):
-    print "From %s to %s -> %4.1f hours" % \
-          (lastMonday, (nextMonday + timedelta(days=-1)), float(week) / 10)
+    print("From %s to %s -> %4.1f hours" % \
+          (lastMonday, (nextMonday + timedelta(days=-1)), float(week) / 10))
 
 def main(f):
     lastMonday = None

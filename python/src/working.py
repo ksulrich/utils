@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -11,10 +11,10 @@ FILE = DB + os.sep + FILE_EXT
 
 def calc():
     dict = read_data()
-    keys = dict.keys()
+    keys = list(dict.keys())
     keys.sort()
     for k in keys:
-        print "%s %3.1d" % (k, dict.get(k))
+        print("%s %3.1d" % (k, dict.get(k)))
 
 def read_data():
     d = {}
@@ -25,7 +25,7 @@ def read_data():
             continue 
         date, value = i.strip().split()
         v = int(value)
-        if d.has_key(date):
+        if date in d:
             d[date] = d[date] + v
             logging.debug("Add value %s to entry %s: New value=%s", v, date, d[date])
         else:
