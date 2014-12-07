@@ -1,6 +1,9 @@
 Django tutorial at
 https://docs.djangoproject.com/en/1.7/
 
+* Generate django project mysite
+  django-admin.py startproject mysite
+
 Commands (Run in directory mysite):
 
 * Database setup
