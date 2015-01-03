@@ -32,3 +32,8 @@ Commands (Run in directory mysite):
 
 * Start the development server
   python manage.py runserver
+
+* Run the tests:
+  klulrich@ADMINIB-JBTL0HV ~/proj/utils/python
+  $ python django/mysite/manage.py test polls
+
